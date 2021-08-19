@@ -6,15 +6,12 @@ from users.models import User
 
 class Review(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE,
-                              related_name='reviews', db_index=True)
-    text = models.TextField(verbose_name='Отзыв', help_text='Напишите отзыв',
-                            db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               db_index=True)
-    pub_date = models.DateTimeField(auto_now_add=True)
-    score = models.IntegerField(validators=[MinValueValidator(1),
-                                            MaxValueValidator(10)],
-                                db_index=True)
+                              related_name='reviews')
+    text = models.TextField(verbose_name='Отзыв', help_text='Напишите отзыв')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
+    score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1),
+                                             MaxValueValidator(10)])
 
     class Meta:
         ordering = ('-pub_date', 'score')
@@ -26,14 +23,11 @@ class Review(models.Model):
 
 class Comment(models.Model):
     review = models.ForeignKey(Review, on_delete=models.CASCADE,
-                               related_name='comments',
-                               db_index=True)
+                               related_name='comments')
     text = models.TextField(verbose_name='Комментарий',
-                            help_text='Введите текст комментария',
-                            db_index=True)
-    pub_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE,
-                               db_index=True)
+                            help_text='Введите текст комментария')
+    pub_date = models.DateTimeField(auto_now_add=True, db_index=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-pub_date',)

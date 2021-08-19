@@ -33,7 +33,7 @@ class APISignUp(APIView):
 
     def post(self, request):
         serializer = ForUserSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             # создаем confirmation code и отправляем на почту
             create_confirmation_code_and_send_email(
@@ -42,7 +42,6 @@ class APISignUp(APIView):
                 {'email': serializer.data['email'],
                  'username': serializer.data['username']},
                 status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class APIToken(APIView):
@@ -51,7 +50,7 @@ class APIToken(APIView):
 
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             user = get_object_or_404(
                 User, username=serializer.data['username'])
             # проверяем confirmation code, если верный, выдаем токен
@@ -63,7 +62,6 @@ class APIToken(APIView):
             return Response({
                 'confirmation code': 'Некорректный код подтверждения!'},
                 status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class APIUser(APIView):

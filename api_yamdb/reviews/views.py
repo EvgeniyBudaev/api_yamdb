@@ -14,28 +14,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        review_id = self.kwargs.get('review_id')
-        review = get_object_or_404(Review, id=review_id)
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'),
+                                   title__id=self.kwargs.get('title_id'))
         return review.comments.all()
 
     def create(self, request, *args, **kwargs):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        review = get_object_or_404(Review, id=self.kwargs['review_id'],
+                                   title__id=self.kwargs.get('title_id'))
         serializer = CommentSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(author=self.request.user, review_id=review.id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment, id=self.kwargs.get('pk'))
+        comment = get_object_or_404(Comment, id=self.kwargs.get('pk'),
+                                    review__id=self.kwargs.get('review_id'))
         if self.request.user != comment.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = CommentSerializer(comment, data=request.data,
                                        partial=True)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -44,8 +44,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthorOrAdministratorOrReadOnly,)
 
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        title = Title.objects.get(id=title_id)
+        title = Title.objects.get(id=self.kwargs.get('title_id'))
         return title.reviews.all()
 
     def create(self, request, *args, **kwargs):
@@ -54,17 +53,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
         # Один отзыв на произведение для одного человека
         if title.reviews.filter(author=self.request.user).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(author=self.request.user, title_id=title.id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
-        review = get_object_or_404(Review, id=self.kwargs['pk'])
+        review = get_object_or_404(Review, id=self.kwargs.get('pk'),
+                                   title__id=self.kwargs.get('title_id'))
         if self.request.user != review.author:
             return Response(status=status.HTTP_403_FORBIDDEN)
         serializer = ReviewSerializer(review, data=request.data, partial=True)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
-        return Response(status=status.HTTP_400_BAD_REQUEST)

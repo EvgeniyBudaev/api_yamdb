@@ -9,7 +9,8 @@ User = get_user_model()
 class Category(models.Model):
     """Модель категории."""
     id = models.AutoField(primary_key=True, editable=False)
-    name = models.CharField(max_length=256, verbose_name='Название категории',
+    name = models.CharField(max_length=256, db_index=True,
+                            verbose_name='Название категории',
                             help_text='Укажите название для категории')
     slug = models.SlugField(max_length=256, unique=True,
                             verbose_name='URL категории',
@@ -29,7 +30,8 @@ class Category(models.Model):
 class Genre(models.Model):
     """Модель жанра."""
     id = models.AutoField(primary_key=True, editable=False)
-    name = models.CharField(max_length=256, verbose_name='Название жанра',
+    name = models.CharField(max_length=256, db_index=True,
+                            verbose_name='Название жанра',
                             help_text='Укажите название жанра')
     slug = models.SlugField(unique=True, verbose_name='URL жанра',
                             help_text='Задайте уникальный URL адрес жанра. '
@@ -48,7 +50,7 @@ class Genre(models.Model):
 class Title(models.Model):
     """Модель произведения."""
     id = models.AutoField(primary_key=True, editable=False)
-    name = models.CharField(max_length=256,
+    name = models.CharField(max_length=256, db_index=True,
                             verbose_name='Название произведения',
                             help_text='Укажите название произведения')
     year = models.PositiveSmallIntegerField(verbose_name='Год выпуска',
